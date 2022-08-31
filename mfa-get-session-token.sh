@@ -33,15 +33,14 @@ export AWS_SECRET_ACCESS_KEY=$(echo $temp_role | jq -r .Credentials.SecretAccess
 export AWS_SESSION_TOKEN=$(echo $temp_role | jq -r .Credentials.SessionToken)
 
 # Add session to AWS config
-aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile MFA
-aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile MFA
-aws configure set aws_session_token $AWS_SESSION_TOKEN --profile MFA
+aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile mfa
+aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile mfa
+aws configure set aws_session_token $AWS_SESSION_TOKEN --profile mfa
 
-echo 'AWS Config updated with MFA profile '
+echo 'AWS Config updated with MFA profile "mfa" '
 
 read -p 'Do you need to perform role assumption with the MFA profile (y/n) ' answer
-
-if [ answer == 'y' ]; then
+if [ $answer == 'y' ]; then
     ## get role information
     read -p 'enter the ARN of the role to assume: ' role_arn
     read -p 'enter a name for the role session: ' role_session_name
@@ -52,12 +51,8 @@ if [ answer == 'y' ]; then
 
     if [ $? -eq 0 ]; then
     echo 'Role assumed, updating AWS Config... '
-else
-    echo 'Unable to assume the role, please check the arn and your permissions are correct '
-    exit
-fi
-
-    # update aws configuration
+    
+    ## update aws configuration
     # export variables
     export AWS_ACCESS_KEY_ID=$(echo $temp_role | jq -r .Credentials.AccessKeyId)
     export AWS_SECRET_ACCESS_KEY=$(echo $temp_role | jq -r .Credentials.SecretAccessKey)
@@ -69,7 +64,11 @@ fi
     aws configure set aws_session_token $AWS_SESSION_TOKEN --profile $role_session_name
     echo 'AWS Profile updated'
     exit
+    else
+    echo 'Unable to assume the role, please check the role trust policy and your permissions are correct '
+    exit
+    fi
 else
-    echo 'Exiting '
+    echo 'role assumption not required exiting '
     exit
 fi
