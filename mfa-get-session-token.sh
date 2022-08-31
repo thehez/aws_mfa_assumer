@@ -47,7 +47,7 @@ if [ $answer == 'y' ]; then
     echo 'Attempting role assumption... '
 
     # call role assumption
-    temp_role=$(aws sts assume-role --role-arn $role_arn --role-session-name $role_session_name --profile 'MFA')
+    temp_role=$(aws sts assume-role --role-arn $role_arn --role-session-name $role_session_name --profile 'mfa')
 
     if [ $? -eq 0 ]; then
     echo 'Role assumed, updating AWS Config... '
