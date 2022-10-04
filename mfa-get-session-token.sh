@@ -11,10 +11,10 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 ## quick script to grab a session token for an MFA arn and update AWS Creds file
 ## get role information
-read -p 'Enter ARN of MFA account: ' mfa_arn
+read -p 'Enter ARN of MFA device: ' mfa_arn
 read -p 'Enter MFA Token: ' token
-read -p 'Enter Profile to use: ' profile_name
-
+read -p 'Enter profile to use: ' profile_name
+read -p 'What do you want to call the MFA profile? ' mfa_profile
 echo 'Attempting to get session token... '
 
 # call STS for session token
@@ -33,11 +33,11 @@ export AWS_SECRET_ACCESS_KEY=$(echo $temp_role | jq -r .Credentials.SecretAccess
 export AWS_SESSION_TOKEN=$(echo $temp_role | jq -r .Credentials.SessionToken)
 
 # Add session to AWS config
-aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile mfa
-aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile mfa
-aws configure set aws_session_token $AWS_SESSION_TOKEN --profile mfa
+aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile $mfa_profile
+aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile $mfa_profile
+aws configure set aws_session_token $AWS_SESSION_TOKEN --profile $mfa_profile
 
-echo 'AWS Config updated with MFA profile "mfa" '
+echo "AWS Config updated with MFA profile '$mfa_profile' "
 
 read -p 'Do you need to perform role assumption with the MFA profile (y/n) ' answer
 if [ $answer == 'y' ]; then
